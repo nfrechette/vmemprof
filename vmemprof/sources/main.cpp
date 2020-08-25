@@ -22,9 +22,27 @@
 // SOFTWARE.
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <benchmark/benchmark.h>
+
+#ifdef _WIN32
+	#include <conio.h>
+
+	extern "C" __declspec(dllimport) int __stdcall IsDebuggerPresent();
+#endif
+
 int main(int argc, char* argv[])
 {
-	(void)argc;
-	(void)argv;
+	benchmark::Initialize(&argc, argv);
+
+	benchmark::RunSpecifiedBenchmarks();
+
+#ifdef _WIN32
+	if (IsDebuggerPresent())
+	{
+		printf("Press any key to continue...\n");
+		while (_kbhit() == 0);
+	}
+#endif
+
 	return 0;
 }
