@@ -51,7 +51,11 @@ static void memcpy_baseline_inline(benchmark::State& state)
 	benchmark::DoNotOptimize(input_buffer);
 	benchmark::DoNotOptimize(output_buffer);
 
+	delete[] input_buffer;
+
 	state.counters["Speed"] = benchmark::Counter(1503, benchmark::Counter::kIsIterationInvariantRate, benchmark::Counter::OneK::kIs1024);
+	state.counters["NumCopies"] = benchmark::Counter(1, benchmark::Counter::kDefaults, benchmark::Counter::kIs1000);
+	state.counters["Allocated"] = benchmark::Counter(double(SOURCE_SIZE), benchmark::Counter::kDefaults, benchmark::Counter::kIs1024);
 }
 
 BENCHMARK(memcpy_baseline_inline)->Repetitions(4);
