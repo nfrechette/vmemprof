@@ -26,12 +26,18 @@
 
 #ifdef _WIN32
 	#include <conio.h>
+	#include <windows.h>
 
 	extern "C" __declspec(dllimport) int __stdcall IsDebuggerPresent();
 #endif
 
 int main(int argc, char* argv[])
 {
+#if defined(_WIN32)
+	// Pin to first core for consistency
+	SetProcessAffinityMask(GetCurrentProcess(), 1 << 0);
+#endif
+
 	benchmark::Initialize(&argc, argv);
 
 	benchmark::RunSpecifiedBenchmarks();
