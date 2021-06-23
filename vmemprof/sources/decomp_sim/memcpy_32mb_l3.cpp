@@ -22,6 +22,10 @@
 // SOFTWARE.
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "decomp_sim.h"
+
+#if defined(DECOMP_SIM_ENABLED)
+
 #include <benchmark/benchmark.h>
 
 #include <cstdint>
@@ -86,3 +90,5 @@ static void memcpy_32mb_l3(benchmark::State& state)
 // The TLB rarely misses
 // Timings are about the same and about 3.96585G/s - 4.05808G/s
 BENCHMARK(memcpy_32mb_l3)->Arg(33)->Arg(43)->Arg(53)->Repetitions(4);
+
+#endif

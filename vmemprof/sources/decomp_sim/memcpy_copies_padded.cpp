@@ -22,6 +22,10 @@
 // SOFTWARE.
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "decomp_sim.h"
+
+#if defined(DECOMP_SIM_ENABLED)
+
 #include <benchmark/benchmark.h>
 
 #include <chrono>
@@ -158,3 +162,5 @@ static void memcpy_copies_padded(benchmark::State& state)
 // Right now, 16mb alignment is indeed consistently slower than 4kb, as expected. But having no alignment, is slower still. Either it prefetches
 // more poorly or it loads more cache lines.
 BENCHMARK(memcpy_copies_padded)->Arg(0)->Arg(4 * 1024)->Arg(16 * 1024 * 1024)->Repetitions(4)->UseManualTime();
+
+#endif

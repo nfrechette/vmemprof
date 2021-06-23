@@ -22,6 +22,10 @@
 // SOFTWARE.
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "decomp_sim.h"
+
+#if defined(DECOMP_SIM_ENABLED)
+
 #include <benchmark/benchmark.h>
 
 #include <cstdint>
@@ -90,3 +94,5 @@ static void memcpy_tlb(benchmark::State& state)
 // Profiling shows that the L1 TLB miss rate is 2.1%, the L2 miss rate is 26.8%
 // The TLB rarely misses
 BENCHMARK(memcpy_tlb)->Arg(850)->Arg(1500)->Arg(2500)->Arg(3500)->Repetitions(4);
+
+#endif

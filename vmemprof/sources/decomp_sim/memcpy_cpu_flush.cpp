@@ -22,6 +22,10 @@
 // SOFTWARE.
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "decomp_sim.h"
+
+#if defined(DECOMP_SIM_ENABLED)
+
 #include <benchmark/benchmark.h>
 
 #include <chrono>
@@ -113,3 +117,5 @@ static void memcpy_cpu_flush(benchmark::State& state)
 }
 
 BENCHMARK(memcpy_cpu_flush)->Arg(8)->Arg(16)->Arg(32)->Repetitions(4)->UseManualTime();
+
+#endif

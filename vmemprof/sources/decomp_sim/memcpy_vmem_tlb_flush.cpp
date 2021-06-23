@@ -22,6 +22,10 @@
 // SOFTWARE.
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "decomp_sim.h"
+
+#if defined(DECOMP_SIM_ENABLED)
+
 #include <benchmark/benchmark.h>
 
 #include <chrono>
@@ -117,3 +121,4 @@ static void memcpy_vmem_tlb_flush(benchmark::State& state)
 // It looks like we manage to flush the TLB but we still hit the L1 regardless.
 BENCHMARK(memcpy_vmem_tlb_flush)->Arg(40)->Arg(68)->Repetitions(4)->UseManualTime();
 
+#endif

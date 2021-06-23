@@ -22,6 +22,10 @@
 // SOFTWARE.
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "decomp_sim.h"
+
+#if defined(DECOMP_SIM_ENABLED)
+
 #include <benchmark/benchmark.h>
 
 #include <cstdint>
@@ -59,3 +63,5 @@ static void memcpy_baseline_inline(benchmark::State& state)
 }
 
 BENCHMARK(memcpy_baseline_inline)->Repetitions(4);
+
+#endif

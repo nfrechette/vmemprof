@@ -22,6 +22,10 @@
 // SOFTWARE.
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "decomp_sim.h"
+
+#if defined(DECOMP_SIM_ENABLED)
+
 #include <benchmark/benchmark.h>
 
 #include <cstdint>
@@ -98,3 +102,5 @@ static void memcpy_vmem_contiguous(benchmark::State& state)
 // Profiling shows that the L1 TLB miss rate is 0.0%, the L2 miss rate is 0.1%
 // Performance is nearly equivalent to running a hot cache. Nothing appears evicted.
 BENCHMARK(memcpy_vmem_contiguous)->Arg(40)->Arg(68)->Arg(100)->Repetitions(4);
+
+#endif

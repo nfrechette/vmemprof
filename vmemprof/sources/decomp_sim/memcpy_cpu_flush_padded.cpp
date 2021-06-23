@@ -22,6 +22,10 @@
 // SOFTWARE.
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "decomp_sim.h"
+
+#if defined(DECOMP_SIM_ENABLED)
+
 #include <benchmark/benchmark.h>
 
 #include <chrono>
@@ -129,3 +133,5 @@ static void memcpy_cpu_flush_padded(benchmark::State& state)
 
 // 16MB is the minimum value where the variance reduces consistently
 BENCHMARK(memcpy_cpu_flush_padded)->Arg(0)->Arg(4)->Arg(16)->Arg(32)->Arg(64)->Arg(96)->Repetitions(20)->UseManualTime();
+
+#endif
