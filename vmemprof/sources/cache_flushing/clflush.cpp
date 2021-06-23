@@ -38,7 +38,7 @@ static void cache_flushing_clflush(benchmark::State& state)
 	constexpr size_t BUFFER_SIZE = 17234;
 	constexpr size_t CACHE_LINE_SIZE = 64;
 
-	volatile size_t memcpy_size0 = 401;
+	volatile size_t memcpy_size = 401;
 
 	uint8_t* input_buffer = new uint8_t[BUFFER_SIZE];
 	std::memset(input_buffer, 0xA6, BUFFER_SIZE);
@@ -49,7 +49,7 @@ static void cache_flushing_clflush(benchmark::State& state)
 	{
 		const auto start = std::chrono::high_resolution_clock::now();
 
-		std::memcpy(output_buffer + 0, input_buffer + 102, memcpy_size0);
+		std::memcpy(output_buffer + 0, input_buffer + 102, memcpy_size);
 
 		const auto end = std::chrono::high_resolution_clock::now();
 
