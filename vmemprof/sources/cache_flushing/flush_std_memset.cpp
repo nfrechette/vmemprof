@@ -22,9 +22,9 @@
 // SOFTWARE.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "decomp_sim.h"
+#include "cache_flushing.h"
 
-#if defined(DECOMP_SIM_ENABLED)
+#if defined(CACHE_FLUSHING_ENABLED)
 
 #include <benchmark/benchmark.h>
 
@@ -36,26 +36,23 @@
 // to make sure we evict all our CPU cache with std::memset.
 // We allocate 1000 copies of the source buffer and align them to reduce the flush cost
 // by flushing only when we loop around.
-static void memcpy_cpu_flush_memset(benchmark::State& state)
+static void cache_flushing_flush_std_memset(benchmark::State& state)
 {
-	const size_t SOURCE_SIZE = 17234;
-	const size_t CACHE_LINE_SIZE = 64;
-	const size_t FLUSH_BUFFER_SIZE = state.range(0) * 1024 * 1024 * 4;
-	const size_t PAGE_SIZE = 4 * 1024;
-	const size_t PADDED_SOURCE_SIZE = (SOURCE_SIZE + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);		// Round to multiple of PAGE_SIZE
-	const size_t NUM_COPIES = 1000;
-	const size_t INPUT_BUFFER_SIZE = SOURCE_SIZE * NUM_COPIES + PAGE_SIZE;		// Add some padding for alignment
+	constexpr size_t SOURCE_SIZE = 17234;
+	constexpr size_t PAGE_SIZE = 4 * 1024;
+	constexpr size_t NUM_COPIES = 1000;
+	constexpr size_t INPUT_BUFFER_SIZE = SOURCE_SIZE * NUM_COPIES + PAGE_SIZE;		// Add some padding for alignment
 
-	volatile size_t memcpy_size0 = 401;
-	volatile size_t memcpy_size1 = 801;
-	volatile size_t memcpy_size2 = 301;
+	volatile size_t memcpy_size = 401;
 
+	// Some source buffer we'll copy
 	uint8_t* source_buffer = new uint8_t[SOURCE_SIZE];
 	std::memset(source_buffer, 0xA6, SOURCE_SIZE);
 
+	// Actual buffer used by benchmark with multiple copies of our source
 	uint8_t* input_buffer = new uint8_t[INPUT_BUFFER_SIZE];
 	uint8_t* aligned_input_buffer = reinterpret_cast<uint8_t*>(reinterpret_cast<uintptr_t>(input_buffer + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1));
-	uint8_t** copies = new uint8_t*[NUM_COPIES];
+	uint8_t* copies[NUM_COPIES];
 	for (size_t i = 0; i < NUM_COPIES; ++i)
 	{
 		uint8_t* buffer = aligned_input_buffer + (i * SOURCE_SIZE);
@@ -64,14 +61,18 @@ static void memcpy_cpu_flush_memset(benchmark::State& state)
 		copies[i] = buffer;
 	}
 
-	uint8_t* flush_buffer = new uint8_t[FLUSH_BUFFER_SIZE];
+	// Buffer we use for flushing
+	const size_t cache_size = state.range(0) * 1024 * 1024;	// Convert MB to bytes
+	const size_t flush_buffer_size = cache_size * 4;		// 4x larger
+	uint8_t* flush_buffer = new uint8_t[flush_buffer_size];
 	uint8_t flush_value = 0;
 
+	// Output buffer we write to
 	uint8_t output_buffer[3 * 1024];
 	size_t copy_index = 0;
 
 	// Flush the CPU cache
-	std::memset(flush_buffer, flush_value++, FLUSH_BUFFER_SIZE);
+	std::memset(flush_buffer, flush_value++, flush_buffer_size);
 
 	for (auto _ : state)
 	{
@@ -79,16 +80,14 @@ static void memcpy_cpu_flush_memset(benchmark::State& state)
 
 		const auto start = std::chrono::high_resolution_clock::now();
 
-		std::memcpy(output_buffer + 0, buffer + 102, memcpy_size0);
-		std::memcpy(output_buffer + memcpy_size0, buffer + 6402, memcpy_size1);
-		std::memcpy(output_buffer + memcpy_size0 + memcpy_size1, buffer + 16586, memcpy_size2);
+		std::memcpy(output_buffer + 0, buffer + 102, memcpy_size);
 
 		const auto end = std::chrono::high_resolution_clock::now();
 
 		if (copy_index >= NUM_COPIES)
 		{
 			// Flush the CPU cache
-			std::memset(flush_buffer, flush_value++, FLUSH_BUFFER_SIZE);
+			std::memset(flush_buffer, flush_value++, flush_buffer_size);
 
 			copy_index = 0;
 		}
@@ -103,14 +102,13 @@ static void memcpy_cpu_flush_memset(benchmark::State& state)
 
 	delete[] source_buffer;
 	delete[] input_buffer;
-	delete[] copies;
 	delete[] flush_buffer;
 
 	state.counters["Speed"] = benchmark::Counter(1503, benchmark::Counter::kIsIterationInvariantRate, benchmark::Counter::OneK::kIs1024);
 	state.counters["NumCopies"] = benchmark::Counter(NUM_COPIES, benchmark::Counter::kDefaults, benchmark::Counter::kIs1000);
-	state.counters["Allocated"] = benchmark::Counter(double(FLUSH_BUFFER_SIZE + INPUT_BUFFER_SIZE), benchmark::Counter::kDefaults, benchmark::Counter::kIs1024);
+	state.counters["Allocated"] = benchmark::Counter(double(flush_buffer_size + INPUT_BUFFER_SIZE), benchmark::Counter::kDefaults, benchmark::Counter::kIs1024);
 }
 
-BENCHMARK(memcpy_cpu_flush_memset)->Arg(8)->Arg(16)->Arg(32)->Repetitions(4)->UseManualTime();
+BENCHMARK(cache_flushing_flush_std_memset)->Arg(8)->Arg(16)->Arg(32)->Iterations(100000)->Repetitions(4)->UseManualTime();
 
 #endif
