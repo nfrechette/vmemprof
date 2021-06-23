@@ -25,34 +25,5 @@ macro(setup_default_compiler_flags _project_name)
 
 		# Add linker flags
 		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /DEBUG")
-	else()
-		# TODO: Handle OS X properly: https://stackoverflow.com/questions/5334095/cmake-multiarchitecture-compilation
-		if(CPU_INSTRUCTION_SET MATCHES "x86")
-			target_compile_options(${_project_name} PRIVATE "-m32")
-			target_link_libraries(${_project_name} PRIVATE "-m32")
-		elseif(CPU_INSTRUCTION_SET MATCHES "x64")
-			target_compile_options(${_project_name} PRIVATE "-m64")
-			target_link_libraries(${_project_name} PRIVATE "-m64")
-		endif()
-
-		if(CPU_INSTRUCTION_SET MATCHES "x86" OR CPU_INSTRUCTION_SET MATCHES "x64")
-			if(USE_SIMD_INSTRUCTIONS)
-				if(USE_AVX_INSTRUCTIONS)
-					target_compile_options(${_project_name} PRIVATE "-mavx")
-					target_compile_options(${_project_name} PRIVATE "-mbmi")
-				else()
-					target_compile_options(${_project_name} PRIVATE "-msse4.1")
-				endif()
-			else()
-				add_definitions(-DRTM_NO_INTRINSICS)
-				add_definitions(-DACL_NO_INTRINSICS)
-			endif()
-		endif()
-
-		target_compile_options(${_project_name} PRIVATE -Wall -Wextra)		# Enable all warnings
-		target_compile_options(${_project_name} PRIVATE -Wshadow)			# Enable shadowing warnings
-		target_compile_options(${_project_name} PRIVATE -Werror)			# Treat warnings as errors
-
-		target_compile_options(${_project_name} PRIVATE -g)					# Enable debug symbols
 	endif()
 endmacro()
