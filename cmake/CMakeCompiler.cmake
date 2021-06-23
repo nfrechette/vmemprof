@@ -7,7 +7,6 @@ macro(setup_default_compiler_flags _project_name)
 		STRING(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})		# Bump warnings to W4
 		target_compile_options(${_project_name} PRIVATE /Zi)				# Add debug info
 		target_compile_options(${_project_name} PRIVATE /Oi)				# Generate intrinsic functions
-		target_compile_options(${_project_name} PRIVATE /WX)				# Treat warnings as errors
 		target_compile_options(${_project_name} PRIVATE /MP)				# Enable parallel compilation
 
 		if(MSVC_VERSION GREATER 1900)
